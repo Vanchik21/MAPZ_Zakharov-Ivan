@@ -1,0 +1,84 @@
+@startuml
+package "Betting System Patterns" {
+
+    ' Singleton: Менеджер системи
+    class BettingManager {
+        - {static} instance: BettingManager
+        + {static} getInstance(): BettingManager
+        + createEvent()
+        + closeLine()
+    }
+
+    ' Гравець
+    class Bettor {
+        - name: String
+        - balance: double
+        + placeBet()
+    }
+
+    ' Ставка
+    class Bet {
+        - betId: int
+        - amount: double
+        - status: String
+        + calculateWin()
+    }
+
+    ' Strategy: Способи оплати
+    interface PaymentStrategy {
+        + pay(amount: double)
+    }
+
+    class CreditCardPayment {
+        + pay(amount: double)
+    }
+
+    class CryptoPayment {
+        + pay(amount: double)
+    }
+
+    ' Factory: Створення подій
+    interface EventFactory {
+        + createEvent(type: String): Event
+    }
+
+    class SportEventFactory {
+        + createEvent(type: String): Event
+    }
+
+    ' Подія (Продукт фабрики)
+    abstract class Event {
+        - eventId: int
+        - date: Date
+        + getDetails()
+    }
+    
+    class FootballMatch {
+        - league: String
+    }
+    
+    class TennisMatch {
+        - surface: String
+    }
+
+    ' Зв'язки
+    Bettor "1" --> "0..*" Bet : places >
+    Bet "1" --> "1" Event : linked to >
+    
+    ' Реалізація Strategy
+    Bettor ..> PaymentStrategy : uses >
+    CreditCardPayment ..|> PaymentStrategy
+    CryptoPayment ..|> PaymentStrategy
+
+    ' Реалізація Factory
+    BettingManager ..> EventFactory : uses >
+    SportEventFactory ..|> EventFactory
+    SportEventFactory ..> Event : creates >
+    
+    Event <|-- FootballMatch
+    Event <|-- TennisMatch
+    
+    ' Singleton зв'язок
+    BettingManager "1" --> "0..*" Event : manages >
+}
+@enduml

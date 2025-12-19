@@ -1,0 +1,65 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package "Bookmaker System Detailed" {
+
+    class Bettor {
+        - userId: Integer
+        - login: String
+        - passwordHash: String
+        - isVerified: Boolean
+        + register(data: Map): Boolean
+        + login(pass: String): Boolean
+        + makeBet(eventId: Int, amount: Double, oddId: Int): Bet
+    }
+
+    class Wallet {
+        - walletId: Integer
+        - currency: String
+        - balance: Double
+        + deposit(amount: Double): Void
+        + withdraw(amount: Double): Boolean
+        + getBalance(): Double
+    }
+
+    class Event {
+        - eventId: Integer
+        - participants: String
+        - startTime: DateTime
+        - status: Enum {PREMATCH, LIVE, FINISHED}
+        - score: String
+        + updateScore(newScore: String): Void
+        + finishEvent(finalResult: String): Void
+        + getDetails(): String
+    }
+
+    class Odd {
+        - oddId: Integer
+        - marketName: String
+        - value: Double
+        - isActive: Boolean
+        + changeValue(newValue: Double): Void
+        + lock(): Void
+    }
+
+    class Bet {
+        - ticketId: Long
+        - amount: Double
+        - potentialWin: Double
+        - status: Enum {PENDING, WON, LOST, RETURN}
+        - timestamp: DateTime
+        + settle(eventResult: String): Double
+        + cashOut(): Double
+    }
+
+    ' Зв'язки
+    Bettor "1" *-- "1" Wallet : owns >
+    Bettor "1" --> "0..*" Bet : places >
+    
+    Event "1" *-- "1..*" Odd : contains >
+    
+    Bet "1" --> "1" Odd : based on >
+    Bet "1" ..> Event : depends on result >
+
+}
+@enduml

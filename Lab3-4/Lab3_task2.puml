@@ -1,0 +1,44 @@
+@startuml
+package "Betting System" {
+
+    class Bettor {
+        - id: int
+        - name: String
+        - balance: double
+        + placeBet()
+        + depositMoney()
+    }
+
+    class Bet {
+        - betId: int
+        - amount: double
+        - status: String
+        - timestamp: Date
+        + calculatePotentialWin(): double
+        + checkResult(): boolean
+    }
+
+    class Event {
+        - eventId: int
+        - teamA: String
+        - teamB: String
+        - startTime: Date
+        - result: String
+        + updateResult()
+        + getDetails()
+    }
+
+    class Odd {
+        - oddId: int
+        - type: String
+        - value: double
+        + updateValue()
+    }
+
+    ' Зв'язки
+    Bettor "1" --> "0..*" Bet : places >
+    Bet "1" --> "1..*" Odd : contains >
+    Event "1" --> "1..*" Odd : has >
+
+}
+@enduml
