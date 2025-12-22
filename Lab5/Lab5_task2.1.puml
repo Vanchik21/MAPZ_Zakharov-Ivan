@@ -1,0 +1,28 @@
+@startuml
+skinparam linestyle ortho
+title Діаграма кооперації: Процес прийому ставки
+
+actor "Гравець" as Client
+rectangle "Інтерфейс (UI)" as UI
+rectangle "Betting Controller" as Ctrl
+rectangle "Event Repository" as EventDB
+rectangle "Wallet System" as Wallet
+rectangle "Bet Repository" as BetDB
+
+Client -right-> UI : 1. Обрати подію()
+UI -right-> Ctrl : 2. Запит коефіцієнтів(eventId)
+Ctrl -down-> EventDB : 3. Отримати дані()
+EventDB -up-> Ctrl : 4. Повернення коефіцієнтів
+Ctrl -left-> UI : 5. Відобразити дані()
+
+Client -right-> UI : 6. Зробити ставку(сума)
+UI -right-> Ctrl : 7. Обробити ставку()
+Ctrl -down-> Wallet : 8. Перевірити баланс()
+Wallet -up-> Ctrl : 9. Баланс OK
+
+Ctrl -down-> BetDB : 10. Зберегти ставку()
+Ctrl -down-> Wallet : 11. Списати кошти()
+Ctrl -left-> UI : 12. Підтвердження ставки()
+UI -left-> Client : 13. Показати квитанцію()
+
+@enduml

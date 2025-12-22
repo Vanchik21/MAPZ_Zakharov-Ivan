@@ -1,0 +1,60 @@
+@startuml
+actor "Гравець" as User
+participant "Інтерфейс\n(View)" as UI
+participant "Betting\nController" as Ctrl
+database "Event\nRepository" as EvRepo
+participant "Wallet\nSystem" as Wallet
+database "Bet\nRepository" as BetDB
+
+title Діаграма послідовності: Розміщення ставки
+
+== Вибір події ==
+User -> UI: 1. Обрати подію (ID: 1024)
+activate UI
+    UI -> Ctrl: 2. getEventDetails(1024)
+    activate Ctrl
+        Ctrl -> EvRepo: 3. findOdds(1024)
+        activate EvRepo
+        EvRepo --> Ctrl: 4. Актуальні коефіцієнти
+        deactivate EvRepo
+    Ctrl --> UI: 5. Дані події (TeamA vs TeamB, Coeff: 1.85)
+    deactivate Ctrl
+UI --> User: 6. Форма ставки
+deactivate UI
+
+== Розміщення ставки ==
+User -> UI: 7. Ввести суму (1000 грн) та підтвердити
+activate UI
+    UI -> Ctrl: 8. placeBet(userId, eventId, 1000)
+    activate Ctrl
+        
+        note right of Ctrl: Перевірка фінансів
+        Ctrl -> Wallet: 9. checkBalance(userId, 1000)
+        activate Wallet
+        
+        alt Недостатньо коштів
+            Wallet --> Ctrl: false
+            Ctrl --> UI: Помилка: Недостатньо коштів
+            UI --> User: Повідомлення про помилку
+        else Коштів достатньо
+            Wallet --> Ctrl: true
+            deactivate Wallet
+            
+            note right of Ctrl: Реєстрація транзакції
+            Ctrl -> BetDB: 10. createTicket(details)
+            activate BetDB
+            BetDB --> Ctrl: Ticket ID: #5599
+            deactivate BetDB
+            
+            Ctrl -> Wallet: 11. withdraw(userId, 1000)
+            activate Wallet
+            Wallet --> Ctrl: Success
+            deactivate Wallet
+            
+            Ctrl --> UI: 12. Ставку прийнято (Ticket #5599)
+            UI --> User: 13. Відображення квитанції
+        end
+        
+    deactivate Ctrl
+deactivate UI
+@enduml
