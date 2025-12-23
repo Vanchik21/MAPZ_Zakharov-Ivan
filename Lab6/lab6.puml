@@ -1,0 +1,65 @@
+@startuml
+skinparam componentStyle rectangle
+
+package "Presentation Layer (Clients)" {
+    [Web Betting Portal] as WebUI
+    [Admin Dashboard] as AdminUI
+}
+
+package "Business Logic Layer" {
+    [Auth Service]
+    [Betting Manager]
+    [Event Manager]
+    [Wallet Manager]
+    
+    interface "IScoreFeed" as IScore
+    interface "IPayment" as IPay
+}
+
+package "Data Access Layer" {
+    [User Repository]
+    [Bet Repository]
+    [Event Repository]
+    
+    database "Betting Database" {
+        [SQL Server]
+    }
+}
+
+package "External Services" {
+    [Payment Gateway (Stripe/Bank)] as Stripe
+    [Live Score API (SportRadar)] as SportApi
+}
+
+' Зв'язки між UI та логікою
+WebUI --> [Auth Service] : Login/Register
+WebUI --> [Betting Manager] : Place Bet
+WebUI --> [Event Manager] : View Odds
+WebUI --> [Wallet Manager] : Deposit/Withdraw
+
+AdminUI --> [Event Manager] : Manage Events
+AdminUI --> [Auth Service] : Block Users
+
+' Внутрішні зв'язки бізнес-логіки
+[Betting Manager] ..> [Event Manager] : Check Odds Status
+[Betting Manager] ..> [Wallet Manager] : Check Funds
+
+' Реалізація інтерфейсів зовнішніх сервісів
+[Event Manager] --> IScore
+IScore <.. SportApi : Provides Data
+
+[Wallet Manager] --> IPay
+IPay <.. Stripe : Process Transaction
+
+' Зв'язки з даними (Repositories)
+[Auth Service] --> [User Repository]
+[Wallet Manager] --> [User Repository]
+[Betting Manager] --> [Bet Repository]
+[Event Manager] --> [Event Repository]
+
+' Зв'язки з БД
+[User Repository] --> [SQL Server]
+[Bet Repository] --> [SQL Server]
+[Event Repository] --> [SQL Server]
+
+@enduml
